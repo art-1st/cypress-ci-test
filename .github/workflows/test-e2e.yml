@@ -11,6 +11,24 @@ jobs:
     name: E2E on Chrome
     steps:
       - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.OS }}-build-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.OS }}-build-
+            ${{ runner.OS }}-
+      - name: Install Dependencies
+        run: yarn install --frozen-lockfile
       - uses: cypress-io/github-action@v4
         with:
           browser: chrome
+          build: yarn build
+          start: yarn start
+          wait-on: 'http://localhost:3000'
+          wait-on-timeout: 120
